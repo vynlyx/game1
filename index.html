@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>滨华中学校园挑战赛 | FUTURE SCHOOL TRIAL</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@600;700&display=swap');
+
+        body {
+            margin: 0;
+            background: #020208;
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        h1.main-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 32px;
+            margin: 0 0 5px 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, #00f0ff, #ff007f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(0,240,255,0.4));
+            text-align: center;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 950px;
+            height: 550px;
+            border: 3px solid #00f0ff;
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
+            background: #060613;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(4, 4, 15, 0.98);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 34px;
+            margin: 0 0 10px 0;
+            color: #00f0ff;
+            text-shadow: 0 0 15px #00f0ff;
+        }
+
+        p {
+            font-size: 18px;
+            color: #a5a5cc;
+            max-width: 650px;
+            margin: 5px 0 15px 0;
+        }
+
+        .btn {
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(135deg, #ff007f, #7000ff);
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 0 15px #ff007f;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px #00f0ff;
+            background: linear-gradient(135deg, #00f0ff, #7000ff);
+        }
+
+        .hub-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            width: 90%;
+            max-width: 850px;
+            margin-top: 20px;
+        }
+
+        .hub-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 2px solid #222;
+            padding: 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .hub-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .hub-card h3 {
+            font-family: 'Orbitron', sans-serif;
+            margin: 0 0 10px 0;
+            font-size: 20px;
+        }
+
+        .grid-menu {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            width: 80%;
+            max-width: 700px;
+            margin-top: 15px;
+        }
+
+        .menu-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid #222;
+            padding: 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .menu-card:hover { transform: translateY(-3px); background: rgba(255, 255, 255, 0.07); }
+        .easy-card { border-color: #39ff14; } .easy-card h3 { color: #39ff14; margin: 0; font-family: 'Orbitron'; }
+        .medium-card { border-color: #00f0ff; } .medium-card h3 { color: #00f0ff; margin: 0; font-family: 'Orbitron'; }
+        .hard-card { border-color: #ffaa00; } .hard-card h3 { color: #ffaa00; margin: 0; font-family: 'Orbitron'; }
+        .impossible-card { border-color: #ff0055; } .impossible-card h3 { color: #ff0055; margin: 0; font-family: 'Orbitron'; }
+        .master-card { border-color: #9400d3; background: rgba(148, 0, 211, 0.05); } .master-card h3 { color: #df00ff; margin: 0; font-family: 'Orbitron'; }
+
+        .disabled-card {
+            border-color: #333 !important;
+            background: rgba(0,0,0,0.6) !important;
+            cursor: not-allowed !important;
+            opacity: 0.4;
+        }
+        .disabled-card:hover { transform: none !important; background: rgba(0,0,0,0.6) !important; }
+
+        #riskNoticeBox {
+            background: rgba(10, 5, 25, 0.95);
+            border: 3px dashed #ff007f;
+            padding: 25px;
+            border-radius: 8px;
+            max-width: 550px;
+        }
+
+        #rollDisplay { font-family: 'Orbitron', sans-serif; font-size: 24px; font-weight: 900; color: #ffff00; margin: 15px 0; }
+        #timerDisplay { font-size: 80px; font-family: 'Orbitron', sans-serif; color: #ff007f; margin: 10px 0; }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 15px 0;
+            width: 100%;
+            max-width: 600px;
+        }
+        .stat-item { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 4px; border-bottom: 2px solid #00f0ff; }
+        .stat-item span { font-size: 14px; color: #888; text-transform: uppercase; }
+        .stat-item div { font-size: 20px; font-weight: bold; font-family: 'Orbitron'; }
+
+        .title-badge { font-size: 24px; font-family: 'Orbitron', sans-serif; color: #ffff00; text-shadow: 0 0 15px #ffff00; font-weight: 900; margin: 3px 0; display: none; }
+        
+        .hud-btn-esc {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #ccc;
+            padding: 5px 12px;
+            font-size: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 5;
+            font-family: 'Orbitron';
+        }
+        .hud-btn-esc:hover { background: #ff3333; color: white; border-color: #ff3333; }
+    </style>
+</head>
+<body>
+
+    <h1 class="main-title">滨华中学校校园挑战赛</h1>
+    <div style="font-family:'Orbitron'; font-size:14px; letter-spacing:3px; color:#a5a5cc; margin-bottom:15px;">FUTURE SCHOOL TRIAL</div>
+
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="950" height="550"></canvas>
+        <button id="escMenuBtn" class="hud-btn-esc" style="display:none;" onclick="quitToHub()">QUIT TO HUB</button>
+
+        <div id="hubScreen" class="overlay">
+            <h2 style="color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.3);">CAMPUS ARENA GATEWAY</h2>
+            <p>Select an experimental simulation course to test your operational limits.</p>
+            
+            <div class="hub-grid">
+                <div class="hub-card" style="border-color: #00f0ff;" onclick="openHypershotMenu()">
+                    <div>
+                        <h3 style="color: #00f0ff;">01 / HYPERSHOT</h3>
+                        <p style="font-size:14px; margin:0; color:#888;">Ranked gun game combat simulator. Survive 30 weapon tiers across multiple difficulties.</p>
+                    </div>
+                    <button class="btn" style="font-size:12px; padding:6px 15px; margin-top:15px;">LAUNCH</button>
+                </div>
+                <div class="hub-card" style="border-color: #ffaa00;" onclick="openBasketballMenu()">
+                    <div>
+                        <h3 style="color: #ffaa00;">02 / PHANTOM HOOPS</h3>
+                        <p style="font-size:14px; margin:0; color:#888;">Physics slingshot shooting. Choose your court modifier difficulty to earn titles.</p>
+                    </div>
+                    <button class="btn" style="font-size:12px; padding:6px 15px; margin-top:15px; background:linear-gradient(135deg, #ffaa00, #ff5500); box-shadow:0 0 10px #ffaa00;">LAUNCH</button>
+                </div>
+                <div class="hub-card" style="border-color: #39ff14;" onclick="openMathMenu()">
+                    <div>
+                        <h3 style="color: #39ff14;">03 / ALGEBRA OVERDRIVE</h3>
+                        <p style="font-size:14px; margin:0; color:#888;">Speed calculation processing. 5 tiers of arithmetic and algebraic acceleration loops.</p>
+                    </div>
+                    <button class="btn" style="font-size:12px; padding:6px 15px; margin-top:15px; background:linear-gradient(135deg, #39ff14, #00aa50); box-shadow:0 0 10px #39ff14;">LAUNCH</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="homeScreen" class="overlay" style="display: none;">
+            <h2 id="difficultyPageTitle">SELECT DIFFICULTY MODE</h2>
+            <p id="difficultyPageDesc">Configure simulation metrics before loading tactical assets.</p>
+            <div class="grid-menu" id="difficultyGridBox">
+                </div>
+            <button class="btn" style="margin-top:20px; font-size:14px; background:#444; box-shadow:none;" onclick="backToHub()">MAIN GATEWAY</button>
+        </div>
+
+        <div id="noticeScreen" class="overlay" style="display: none;">
+            <div id="riskNoticeBox">
+                <h2 id="noticeTitle" style="color:#ff007f; font-size:24px;">RISK ASSIGNMENT NOTIFICATION</h2>
+                <div id="noticeBody" style="text-align: left; font-size: 15px; line-height: 1.4; color: #d1d1e0; margin: 15px 0;"></div>
+                <button class="btn" onclick="executeNoticeAction()">CONFIRM & PROCEED</button>
+            </div>
+        </div>
+
+        <div id="rngScreen" class="overlay" style="display: none;">
+            <h2 style="color: #ff007f;">🎰 INITIALIZING RNG PERK SPIN...</h2>
+            <div id="rollDisplay">Spinning Modifiers...</div>
+        </div>
+
+        <div id="reviveScreen" class="overlay" style="display: none;">
+            <h2>WIPED OUT!</h2>
+            <div id="timerDisplay">5</div>
+            <p style="font-size: 16px; color: #00f0ff;">Recalibrating defense metrics...</p>
+        </div>
+
+        <div id="winScreen" class="overlay" style="display: none;">
+            <h2 id="endScreenHeader" style="color:#39ff14;">🏆 TRIAL COMPLETED! 🏆</h2>
+            <p id="endScreenDesc">Your performance metrics have been compiled successfully.</p>
+            
+            <div id="titleGenius" class="title-badge">👑 TITLE UNLOCKED: GENIUS 👑</div>
+            <div id="titleSharpshooter" class="title-badge" style="color:#00f0ff; text-shadow:0 0 15px #00f0ff;">🎯 TITLE UNLOCKED: SHARPSHOOTER 🎯</div>
+            <div id="titleMathematician" class="title-badge" style="color:#39ff14; text-shadow:0 0 15px #39ff14;">📐 TITLE UNLOCKED: MATHEMATICIAN 📐</div>
+            <div id="titleMasterMath" class="title-badge" style="color:#df00ff; text-shadow:0 0 15px #df00ff;">💎 TITLE UNLOCKED: MASTER OF MATHEMATICS 💎</div>
+            <div id="titlePerfectScorer" class="title-badge" style="color:#ffff00; text-shadow:0 0 15px #ffff00;">💯 TITLE UNLOCKED: PERFECT SCORER 💯</div>
+            <div id="titleLegend" class="title-badge" style="color:#ff0055; text-shadow:0 0 25px #ff0055;">🌟 TITLE UNLOCKED: LEGEND 🌟</div>
+
+            <div class="stat-grid">
+                <div class="stat-item"><span>Course</span><div id="resDiff">-</div></div>
+                <div class="stat-item"><span>Target Score</span><div id="resKills">-</div></div>
+                <div class="stat-item"><span>Total Fails</span><div id="resDeaths">-</div></div>
+                <div class="stat-item"><span>Data Metric</span><div id="resDmg">-</div></div>
+                <div class="stat-item"><span>Time Taken</span><div id="resTime">-</div></div>
+                <div class="stat-item" style="border-color:#ff007f;"><span id="rankLabel">Final Rank</span><div id="resRank" style="color:#ff007f;">-</div></div>
+            </div>
+
+            <button class="btn" id="loadMasterDirectBtn" style="display:none; background:linear-gradient(135deg, #9400d3, #ff00ff); margin-right:15px;" onclick="loadMasterFromResults()">CHALLENGE MASTER MODE</button>
+            <button class="btn" onclick="backToHub()">RETURN TO HUB</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Screens
+        const hubScreen = document.getElementById('hubScreen');
+        const homeScreen = document.getElementById('homeScreen');
+        const noticeScreen = document.getElementById('noticeScreen');
+        const rngScreen = document.getElementById('rngScreen');
+        const reviveScreen = document.getElementById('reviveScreen');
+        const winScreen = document.getElementById('winScreen');
+        const escMenuBtn = document.getElementById('escMenuBtn');
+
+        // Dynamic Elements
+        const difficultyPageTitle = document.getElementById('difficultyPageTitle');
+        const difficultyPageDesc = document.getElementById('difficultyPageDesc');
+        const difficultyGridBox = document.getElementById('difficultyGridBox');
+        const noticeTitle = document.getElementById('noticeTitle');
+        const noticeBody = document.getElementById('noticeBody');
+        const rollDisplay = document.getElementById('rollDisplay');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const loadMasterDirectBtn = document.getElementById('loadMasterDirectBtn');
+        const endScreenHeader = document.getElementById('endScreenHeader');
+        const endScreenDesc = document.getElementById('endScreenDesc');
+        const rankLabel = document.getElementById('rankLabel');
+
+        // Global State System
+        let activeGameMode = "Hub"; 
+        let menuTargetContext = ""; 
+        let gameActive = false;
+        let isDead = false;
+        let frameCount = 0;
+        let mouse = { x: 475, y: 275 };
+        let selectedDifficulty = "Easy";
+
+        // Persistence Flag
+        let isMasterMathUnlocked = false;
+
+        // Stats captures
+        let statKills = 0; let statDeaths = 0; let statDamageDealt = 0; let statStartTime = 0;
+
+        // Key Engine Bindings
+        const keys = { w: false, a: false, s: false, d: false };
+        window.addEventListener('keydown', e => { if(e.key.toLowerCase() in keys) keys[e.key.toLowerCase()] = true; });
+        window.addEventListener('keyup', e => { if(e.key.toLowerCase() in keys) keys[e.key.toLowerCase()] = false; });
+
+        canvas.addEventListener('mousemove', e => {
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = e.clientX - rect.left; mouse.y = e.clientY - rect.top;
+        });
+
+        let isMouseDown = false;
+        canvas.addEventListener('mousedown', e => { 
+            if (!gameActive || isDead) return;
+            isMouseDown = true; 
+            if (activeGameMode === "Basketball") basketballMouseDown(e);
+        });
+        window.addEventListener('mouseup', e => { 
+            isMouseDown = false; 
+            if (activeGameMode === "Basketball") basketballMouseUp(e);
+        });
+
+        function quitToHub() { gameActive = false; backToHub(); }
+        function backToHub() {
+            homeScreen.style.display = 'none'; winScreen.style.display = 'none';
+            noticeScreen.style.display = 'none'; rngScreen.style.display = 'none';
+            reviveScreen.style.display = 'none'; escMenuBtn.style.display = 'none';
+            loadMasterDirectBtn.style.display = 'none';
+            hubScreen.style.display = 'flex'; activeGameMode = "Hub";
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+        }
+
+        function hideAllBadges() {
+            document.getElementById('titleGenius').style.display = "none";
+            document.getElementById('titleSharpshooter').style.display = "none";
+            document.getElementById('titleMathematician').style.display = "none";
+            document.getElementById('titleMasterMath').style.display = "none";
+            document.getElementById('titlePerfectScorer').style.display = "none";
+            document.getElementById('titleLegend').style.display = "none";
+        }
+
+        // ==========================================
+        // DYNAMIC SCREEN DISPLAY INJECTIONS
+        // ==========================================
+        function openHypershotMenu() {
+            menuTargetContext = "Hypershot";
+            difficultyPageTitle.innerText = "SELECT HYPERSHOT DIFFICULTY";
+            difficultyPageDesc.innerText = "Master 10 weapon tiers across 30 rapid eliminations:";
+            difficultyGridBox.style.gridTemplateColumns = "repeat(2, 1fr)";
+            
+            difficultyGridBox.innerHTML = `
+                <div class="menu-card easy-card" onclick="selectDifficulty('Easy')"><h3>EASY MODE</h3><div style="font-size:13px; color:#aaa;">No Armoured Bosses. No RNG Wheel. Rank capped at Silver.</div></div>
+                <div class="menu-card medium-card" onclick="selectDifficulty('Medium')"><h3>MEDIUM MODE</h3><div style="font-size:13px; color:#aaa;">Armoured Bosses unlocked. Standard RNG spins included.</div></div>
+                <div class="menu-card hard-card" onclick="selectDifficulty('Hard')"><h3>HARD MODE</h3><div style="font-size:13px; color:#aaa;">Faster enemies. Perks are rarer. Earn the legendary title!</div></div>
+                <div class="menu-card impossible-card" onclick="selectDifficulty('Impossible')"><h3>IMPOSSIBLE</h3><div style="font-size:13px; color:#aaa;">Curses doubled. Insane speeds. Pure adrenaline run.</div></div>
+            `;
+            hubScreen.style.display = 'none'; homeScreen.style.display = 'flex';
+        }
+
+        function openBasketballMenu() {
+            menuTargetContext = "Basketball";
+            difficultyPageTitle.innerText = "SELECT PHANTOM HOOPS COURT DIFFICULTY";
+            difficultyPageDesc.innerText = "Set court speed vectors and temporal limits before attempting goals:";
+            difficultyGridBox.style.gridTemplateColumns = "repeat(2, 1fr)";
+            
+            difficultyGridBox.innerHTML = `
+                <div class="menu-card easy-card" onclick="selectDifficulty('Easy')"><h3>EASY COURT</h3><div style="font-size:13px; color:#aaa;">Basket is completely STILL. Generous Time: 60s. Max rank capped at Silver.</div></div>
+                <div class="menu-card medium-card" onclick="selectDifficulty('Medium')"><h3>MEDIUM COURT</h3><div style="font-size:13px; color:#aaa;">Basket is STILL. High pressure Time Limit: 30s.</div></div>
+                <div class="menu-card hard-card" onclick="selectDifficulty('Hard')"><h3>HARD COURT</h3><div style="font-size:13px; color:#aaa;">Moving basket target. Time: 30s. Perfect accuracy wins titles!</div></div>
+                <div class="menu-card impossible-card" onclick="selectDifficulty('Impossible')"><h3>IMPOSSIBLE</h3><div style="font-size:13px; color:#aaa;">Basket moves at intense hypersonic speeds. Brutal Time Limit: 18s.</div></div>
+            `;
+            hubScreen.style.display = 'none'; homeScreen.style.display = 'flex';
+        }
+
+        function openMathMenu() {
+            menuTargetContext = "Math";
+            difficultyPageTitle.innerText = "SELECT ALGEBRA OVERDRIVE COURSE";
+            difficultyPageDesc.innerText = "Select calculation frequency matrix. Master Tier requires an Impossible Tier clear:";
+            difficultyGridBox.style.gridTemplateColumns = "repeat(3, 1fr)";
+
+            let masterCardHTML = `<div class="menu-card master-card disabled-card"><h3>MASTER TIER 🔒</h3><div style="font-size:12px; color:#666;">LOCKED. Clear Impossible course with Rank 1 or 2 to access.</div></div>`;
+            if (isMasterMathUnlocked) {
+                masterCardHTML = `<div class="menu-card master-card" onclick="selectDifficulty('Master')"><h3>MASTER TIER</h3><div style="font-size:12px; color:#df00ff; font-weight:bold;">UNLOCKED. Algebra loops + Extreme equations. 3 Errors max.</div></div>`;
+            }
+            
+            difficultyGridBox.innerHTML = `
+                <div class="menu-card easy-card" onclick="selectDifficulty('Easy')"><h3>EASY</h3><div style="font-size:12px; color:#aaa;">Simple Addition/Subtraction (5+9). Slow speed. 5 errors allowed. Rank capped.</div></div>
+                <div class="menu-card medium-card" onclick="selectDifficulty('Medium')"><h3>MEDIUM</h3><div style="font-size:12px; color:#aaa;">Moderate values (+-*/, 21*5). Faster drop speed. 5 errors allowed.</div></div>
+                <div class="menu-card hard-card" onclick="selectDifficulty('Hard')"><h3>HARD</h3><div style="font-size:12px; color:#aaa;">Hard equations (356+23, 483/7). Re-calibrated speed. 5 errors allowed.</div></div>
+                <div class="menu-card impossible-card" onclick="selectDifficulty('Impossible')"><h3>IMPOSSIBLE</h3><div style="font-size:12px; color:#aaa;">Insane crunch (4895+763, 3125/25). Re-calibrated speed. Strict 3 errors max. Unlocks Master!</div></div>
+                ${masterCardHTML}
+            `;
+            hubScreen.style.display = 'none'; homeScreen.style.display = 'flex';
+        }
+
+        function selectDifficulty(mode) {
+            selectedDifficulty = mode; homeScreen.style.display = 'none';
+            noticeTitle.innerText = `${mode.toUpperCase()} SECURITY ALLOCATION`;
+            let txt = "";
+
+            if (menuTargetContext === "Hypershot") {
+                if(mode==="Easy") txt = "• BOSSES: Disabled.<br/>• RNG WHEEL: Disabled.<br/>• STATS: Cap limit at Silver Rank.";
+                if(mode==="Medium") txt = "• BOSSES: Standard 2-shot entities.<br/>• RNG SPIN: Active (65% Curse / 35% Perk).";
+                if(mode==="Hard") txt = "• RISKS: Enemies move 20% faster, shoot 15% quicker.<br/>• BONUS: Clear with top rank to win 'GENIUS' title!";
+                if(mode==="Impossible") txt = "• RISKS: Enemies move 40% faster. Curses have doubled impact potency.<br/>• SPECIAL: Clear at Rank 1 or 2 to earn the 'GENIUS' title!";
+            } else if (menuTargetContext === "Basketball") {
+                if(mode==="Easy") txt = "• MOTION VALUE: Stationary hoop centered on court.<br/>• TIMER THRESHOLD: 60 seconds allocated.<br/>• RISK CLAUSE: Maximum rank capped at Silver.";
+                if(mode==="Medium") txt = "• MOTION VALUE: Stationary hoop centered on court.<br/>• TIMER THRESHOLD: Reduced to 30 seconds.";
+                if(mode==="Hard") txt = "• MOTION VALUE: Basket glides back and forth at moderate speed.<br/>• TIMER THRESHOLD: 30 seconds allocated.<br/>• TITLES: Top rank grants 'GENIUS'. 100% accuracy grants 'SHARPSHOOTER'!";
+                if(mode==="Impossible") txt = "• MOTION VALUE: Basket moves at intense hypersonic speeds.<br/>• TIMER THRESHOLD: Extreme 18-second time crunch.<br/>• TITLES: Top 3 ranks grant 'GENIUS'. No misses grants 'SHARPSHOOTER'!";
+            } else if (menuTargetContext === "Math") {
+                if(mode==="Easy") txt = "• MATRIX CHARGE: Basic single digits (e.g. 5+9, 8*4).<br/>• DROP VELOCITY: Constant slow pace.<br/>• SAFE BUFFER: 5 Errors permitted before shutdown.<br/>• ACCREDITATION: Performance evaluation locked to Bronze/Silver.";
+                if(mode==="Medium") txt = "• MATRIX CHARGE: Double digits operations (+-*/, e.g. 21*5, 84/4).<br/>• DROP VELOCITY: Standard accelerated pace.<br/>• SAFE BUFFER: 5 Errors permitted before shutdown.";
+                if(mode==="Hard") txt = "• MATRIX CHARGE: Intense triple digits (+-*/, e.g. 356+23, 483/7).<br/>• DROP VELOCITY: Tuned down to a balanced 2.2 m/s tracking speed.<br/>• SAFE BUFFER: 5 Errors permitted.<br/>• UNIQUE TITLES: Rank 1 grants 'MATHEMATICIAN'.";
+                if(mode==="Impossible") txt = "• MATRIX CHARGE: Multi-digit calculation load (e.g. 4895+763, 3125/25).<br/>• DROP VELOCITY: Tuned down to match hard mode pacing.<br/>• SAFE BUFFER: Strict 3 Errors allowed.<br/>• GATEKEEPER: Rank 1 or 2 permanently unlocks Master Mode.";
+                if(mode==="Master") txt = "• MATRIX CHARGE: Extreme parameters (56783+4267) mixed with linear algebra variables (e.g. 3x + 14 = 35).<br/>• DROP VELOCITY: Synced with balanced pacing.<br/>• SAFE BUFFER: Strict 3 Errors allowed.<br/>• TITLES: Rank 1 grants 'MASTER OF MATHEMATICS'. Clear without error to become 'LEGEND'!";
+            }
+
+            noticeBody.innerHTML = txt; noticeScreen.style.display = 'flex';
+        }
+
+        function executeNoticeAction() {
+            noticeScreen.style.display = 'none';
+            if (menuTargetContext === "Hypershot") {
+                if(selectedDifficulty === "Easy") {
+                    activeModifier = { name: "None", type: "none" };
+                    enemySpeedMultiplier = 1.0; enemyFireRateMultiplier = 1.0; playerDamageMultiplier = 1.0;
+                    player.maxHp = 100; player.speed = 4.5;
+                    launchHypershot();
+                } else { runHypershotGacha(); }
+            } else if (menuTargetContext === "Basketball") {
+                launchBasketballCourt();
+            } else if (menuTargetContext === "Math") {
+                launchMathOverdrive();
+            }
+        }
+
+        function loadMasterFromResults() {
+            winScreen.style.display = 'none';
+            loadMasterDirectBtn.style.display = 'none';
+            menuTargetContext = "Math";
+            selectDifficulty("Master");
+        }
+
+
+        // ==========================================
+        // GAME 1: HYPERSHOT SUBSYSTEM MODULE
+        // ==========================================
+        let lastShotTime = 0; let currentWeaponIndex = 0;
+        let activeModifier = { name: "Normal Mode", type: "none" };
+        let enemySpeedMultiplier = 1.0; let enemyFireRateMultiplier = 1.0; let playerDamageMultiplier = 1.0;
+        const targetKills = 30; const maxEnemies = 4;
+        
+        const player = { x: 475, y: 275, size: 30, speed: 4.5, color: '#00f0ff', hp: 100, maxHp: 100, iFrames: 0 };
+        const weapons = [
+            { name: "Starter Laser", color: "#00f0ff", fireRate: 20, speed: 10, size: 4 },
+            { name: "Dual Phaser", color: "#ff007f", fireRate: 15, speed: 12, size: 5 },
+            { name: "Algebra Breaker", color: "#ffff00", fireRate: 25, speed: 9, size: 8 },
+            { name: "Science Ray", color: "#39ff14", fireRate: 12, speed: 15, size: 4 },
+            { name: "History Repeater", color: "#ff7f00", fireRate: 8, speed: 11, size: 5 },
+            { name: "Art Splatter", color: "#9400d3", fireRate: 18, speed: 8, size: 10 },
+            { name: "Sport Striker", color: "#ff0000", fireRate: 22, speed: 14, size: 7 },
+            { name: "Robotics Blaster", color: "#00ffff", fireRate: 10, speed: 16, size: 5 },
+            { name: "Computing Beam", color: "#00ff66", fireRate: 6, speed: 18, size: 3 },
+            { name: "HYPER-GRADUATOR", color: "#ffffff", fireRate: 4, speed: 20, size: 6 }
+        ];
+        let projectiles = []; let enemyProjectiles = []; let enemies = []; let particles = []; let damagePops = [];
+        const enemyLexicon = [
+            { text: "MATHS EXAM", dmg: 25, hp: 1, color: '#ff4d4d', isBoss: false },
+            { text: "HISTORY QUIZ", dmg: 20, hp: 1, color: '#ffa64d', isBoss: false },
+            { text: "HOMEWORK STACK", dmg: 30, hp: 1, color: '#ffff4d', isBoss: false },
+            { text: "ESSAY DEADLINE", dmg: 35, hp: 1, color: '#4dff4d', isBoss: false },
+            { text: "DETENTION", dmg: 40, hp: 1, color: '#4dffff', isBoss: false },
+            { text: "⚠️ FINAL EXAM (BOSS) ⚠️", dmg: 50, hp: 2, color: '#ff00ff', isBoss: true },
+            { text: "⚠️ PRINCIPAL INTERVIEW (BOSS) ⚠️", dmg: 50, hp: 2, color: '#ff0055', isBoss: true }
+        ];
+
+        function runHypershotGacha() {
+            rngScreen.style.display = 'flex';
+            let spinTime = 0;
+            let tick = setInterval(() => {
+                rollDisplay.innerText = ["SPEED CURSE", "HEALTH PERK", "WEAK BLAST", "BOSS OVERLOAD"][Math.floor(Math.random()*4)];
+                if(++spinTime > 10) { clearInterval(tick); finalizeHypershotGacha(); }
+            }, 100);
+        }
+
+        function finalizeHypershotGacha() {
+            let roll = Math.random() * 100;
+            let goodChance = selectedDifficulty === "Medium" ? 35 : (selectedDifficulty === "Hard" ? 15 : 5);
+            let isGood = roll < goodChance;
+            
+            player.maxHp = 100; player.speed = 4.5; enemySpeedMultiplier = selectedDifficulty==="Hard"?1.2:(selectedDifficulty==="Impossible"?1.4:1.0);
+            enemyFireRateMultiplier = selectedDifficulty==="Hard"?1.15:(selectedDifficulty==="Impossible"?1.3:1.0);
+            playerDamageMultiplier = 1.0;
+
+            if(isGood) {
+                let r = Math.random();
+                if(r < 0.33) { activeModifier = { name: "Titan Metrics (+50 Max HP)", type: "good_hp" }; player.maxHp = 150; }
+                else if(r < 0.66) { activeModifier = { name: "Hyperdrive (Speed Boost)", type: "good_speed" }; player.speed = 6.2; }
+                else { activeModifier = { name: "Overcharge (2x Laser Damage)", type: "good_dmg" }; playerDamageMultiplier = 2.0; }
+            } else {
+                let r = Math.random(); let potency = selectedDifficulty === "Impossible" ? 2.0 : 1.0;
+                if(r < 0.33) { activeModifier = { name: "Boss Menace Overload", type: "bad_5shot" }; }
+                else if(r < 0.66) { activeModifier = { name: `Overclocked Speed (+${Math.floor(40*potency)}%)`, type: "bad_speed" }; enemySpeedMultiplier += (0.4*potency); }
+                else { activeModifier = { name: `Rusty Ray (-${Math.floor(30*potency)}% Dmg)`, type: "bad_weak" }; playerDamageMultiplier -= (0.3*potency); }
+            }
+            rollDisplay.innerText = `🎰 ROLLED: ${activeModifier.name.toUpperCase()}`;
+            rollDisplay.style.color = isGood ? "#39ff14" : "#ff3333";
+            setTimeout(() => { rngScreen.style.display = 'none'; launchHypershot(); }, 1200);
+        }
+
+        function launchHypershot() {
+            activeGameMode = "Hypershot"; gameActive = true; isDead = false; isMouseDown = false;
+            statKills = 0; statDeaths = 0; statDamageDealt = 0; frameCount = 0; currentWeaponIndex = 0;
+            player.hp = player.maxHp; player.iFrames = 0;
+            escMenuBtn.style.display = 'block';
+            projectiles = []; enemyProjectiles = []; enemies = []; particles = []; damagePops = [];
+            player.x = canvas.width / 2; player.y = canvas.height / 2;
+            statStartTime = performance.now();
+            animate();
+        }
+
+        function hypershotWin() {
+            gameActive = false; escMenuBtn.style.display = 'none';
+            let elapsed = ((performance.now() - statStartTime) / 1000).toFixed(1);
+            hideAllBadges();
+            
+            let rank = "BRONZE";
+            if (selectedDifficulty === "Easy") {
+                rank = (statDeaths === 0 && elapsed < 45) ? "SILVER [TOP CELL]" : "BRONZE [STANDARD]";
+            } else {
+                let score = parseFloat(elapsed) + (statDeaths * 15);
+                if (selectedDifficulty === "Medium") {
+                    rank = score < 55 ? "GRANDMASTER [1ST]" : (score < 80 ? "MASTER [2ND]" : "DIAMOND");
+                } else if (selectedDifficulty === "Hard") {
+                    rank = score < 65 ? "GRANDMASTER [1ST]" : (score < 90 ? "MASTER [2ND]" : "DIAMOND");
+                } else {
+                    rank = score < 80 ? "GRANDMASTER [1ST]" : (score < 110 ? "MASTER [2ND]" : (score < 150 ? "DIAMOND [3RD]" : "PLATINUM"));
+                }
+            }
+
+            endScreenHeader.innerText = "🏆 SIMULATION TRIUMPH! 🏆";
+            endScreenDesc.innerText = "Hypershot operational metrics catalogued successfully.";
+            rankLabel.innerText = "Final Combat Rank";
+            
+            document.getElementById('resDiff').innerText = `HYPERSHOT (${selectedDifficulty})`;
+            document.getElementById('resKills').innerText = `${statKills} / 30`;
+            document.getElementById('resDeaths').innerText = statDeaths;
+            document.getElementById('resDmg').innerText = statDamageDealt;
+            document.getElementById('resTime').innerText = `${elapsed}s`;
+            document.getElementById('resRank').innerText = rank;
+
+            let genius = false;
+            if (selectedDifficulty === "Hard" && rank === "GRANDMASTER [1ST]") genius = true;
+            if (selectedDifficulty === "Impossible" && (rank === "GRANDMASTER [1ST]" || rank === "MASTER [2ND]")) genius = true;
+            
+            if (genius) document.getElementById('titleGenius').style.display = "block";
+            winScreen.style.display = 'flex';
+        }
+
+
+        // ==========================================
+        // GAME 2: PHANTOM BASKETBALL COURT MODULE
+        // ==========================================
+        let bbScore = 0; let bbAttempts = 0; let bbTimer = 0;
+        let ball = { x: 150, y: 450, vx: 0, vy: 0, radius: 15, isFlying: false };
+        let hoop = { x: 750, y: 200, width: 75, height: 10, speed: 0, direction: 1 };
+        let bbAiming = false;
+
+        function launchBasketballCourt() {
+            activeGameMode = "Basketball"; gameActive = true; isDead = false; isMouseDown = false;
+            bbScore = 0; bbAttempts = 0; frameCount = 0; bbAiming = false;
+            escMenuBtn.style.display = 'block';
+            
+            if (selectedDifficulty === "Easy") { hoop.speed = 0; hoop.x = 750; bbTimer = 60; }
+            else if (selectedDifficulty === "Medium") { hoop.speed = 0; hoop.x = 750; bbTimer = 30; }
+            else if (selectedDifficulty === "Hard") { hoop.speed = 2.4; hoop.x = 650; bbTimer = 30; }
+            else if (selectedDifficulty === "Impossible") { hoop.speed = 5.5; hoop.x = 600; bbTimer = 18; }
+
+            ball.x = 150; ball.y = 450; ball.vx = 0; ball.vy = 0; ball.isFlying = false;
+            particles = []; damagePops = [];
+            statStartTime = performance.now();
+            animate();
+        }
+
+        function resetBasketballPosition() { ball.x = 150; ball.y = 450; ball.vx = 0; ball.vy = 0; ball.isFlying = false; }
+        function basketballMouseDown(e) { if (!ball.isFlying) bbAiming = true; }
+        function basketballMouseUp(e) {
+            if (bbAiming) {
+                bbAiming = false;
+                let dx = mouse.x - ball.x; let dy = mouse.y - ball.y;
+                ball.vx = dx * 0.12; ball.vy = dy * 0.12;
+                ball.isFlying = true; bbAttempts++;
+            }
+        }
+
+        function basketballEnd(success) {
+            gameActive = false; escMenuBtn.style.display = 'none';
+            let elapsed = ((performance.now() - statStartTime) / 1000).toFixed(1);
+            hideAllBadges();
+            
+            let accuracy = bbAttempts > 0 ? Math.floor((bbScore / bbAttempts) * 100) : 0;
+            let rank = "BRONZE COURT";
+            if (success) {
+                if (selectedDifficulty === "Easy") { rank = accuracy >= 80 ? "SILVER [TOP CELL]" : "BRONZE [STANDARD]"; } 
+                else {
+                    let scoreWeight = (parseFloat(elapsed) * 0.4) + ((bbAttempts - bbScore) * 12);
+                    if (selectedDifficulty === "Medium") rank = scoreWeight < 15 ? "GRANDMASTER [1ST]" : (scoreWeight < 30 ? "MASTER [2ND]" : "DIAMOND");
+                    else if (selectedDifficulty === "Hard") rank = scoreWeight < 22 ? "GRANDMASTER [1ST]" : (scoreWeight < 40 ? "MASTER [2ND]" : "DIAMOND");
+                    else if (selectedDifficulty === "Impossible") rank = scoreWeight < 20 ? "GRANDMASTER [1ST]" : (scoreWeight < 32 ? "MASTER [2ND]" : (scoreWeight < 55 ? "DIAMOND [3RD]" : "PLATINUM"));
+                }
+            } else { rank = "FAILED TRIAL"; }
+
+            endScreenHeader.innerText = success ? "🏆 COURT MASTERED! 🏆" : "❌ DEFEAT: OUT OF TIME ❌";
+            endScreenDesc.innerText = "Phantom hoops physics diagnostics calculated.";
+            rankLabel.innerText = "Final Court Rank";
+            
+            document.getElementById('resDiff').innerText = `BASKETBALL (${selectedDifficulty.toUpperCase()})`;
+            document.getElementById('resKills').innerText = `${bbScore} / 10 Goals`;
+            document.getElementById('resDeaths').innerText = bbAttempts - bbScore;
+            document.getElementById('resDmg').innerText = `${accuracy}% ACCURACY`;
+            document.getElementById('resTime').innerText = `${elapsed}s`;
+            document.getElementById('resRank').innerText = rank;
+            
+            let genius = false;
+            if (success && selectedDifficulty === "Hard" && rank === "GRANDMASTER [1ST]") genius = true;
+            if (success && selectedDifficulty === "Impossible" && (rank === "GRANDMASTER [1ST]" || rank === "MASTER [2ND]" || rank === "DIAMOND [3RD]")) genius = true;
+            
+            let sharpshooter = false;
+            if (success && (selectedDifficulty === "Hard" || selectedDifficulty === "Impossible") && bbScore === bbAttempts) sharpshooter = true;
+
+            if (genius) document.getElementById('titleGenius').style.display = "block";
+            if (sharpshooter) document.getElementById('titleSharpshooter').style.display = "block";
+            winScreen.style.display = 'flex';
+        }
+
+
+        // ==========================================
+        // GAME 3: ALGEBRA OVERDRIVE DYNAMIC CORE
+        // ==========================================
+        let mathScore = 0; let mathFails = 0; let mathMaxAllowedErrors = 5; let mathTarget = 10;
+        let equationText = ""; let correctAnswer = 0; let mathDropSpeedBase = 1.5;
+        let mathBlocks = []; let mathPlayerX = 475;
+        const mathPlayerSize = 35;
+
+        function launchMathOverdrive() {
+            activeGameMode = "Math"; gameActive = true; isDead = false; isMouseDown = false;
+            mathScore = 0; mathFails = 0; frameCount = 0; mathPlayerX = 475;
+            mathBlocks = [];
+            escMenuBtn.style.display = 'block';
+
+            // RE-CALIBRATED SPEED VALUES (Reduced to balanced 2.2 metrics for top difficulties)
+            if (selectedDifficulty === "Easy") { mathDropSpeedBase = 1.1; mathMaxAllowedErrors = 5; }
+            else if (selectedDifficulty === "Medium") { mathDropSpeedBase = 1.6; mathMaxAllowedErrors = 5; }
+            else if (selectedDifficulty === "Hard") { mathDropSpeedBase = 2.2; mathMaxAllowedErrors = 5; }
+            else if (selectedDifficulty === "Impossible") { mathDropSpeedBase = 2.2; mathMaxAllowedErrors = 3; }
+            else if (selectedDifficulty === "Master") { mathDropSpeedBase = 1.8; mathMaxAllowedErrors = 3; }
+
+            generateDynamicMathProblem();
+            statStartTime = performance.now();
+            animate();
+        }
+
+        function generateDynamicMathProblem() {
+            let x = 0; mathBlocks = [];
+            let displayFormula = "";
+
+            if (selectedDifficulty === "Easy") {
+                let isAdd = Math.random() < 0.5;
+                let v1 = Math.floor(Math.random() * 8) + 2; let v2 = Math.floor(Math.random() * 8) + 2;
+                if (isAdd) { correctAnswer = v1 + v2; displayFormula = `${v1} + ${v2} = ?`; }
+                else { correctAnswer = Math.max(v1, v2) - Math.min(v1, v2); displayFormula = `${Math.max(v1,v2)} - ${Math.min(v1,v2)} = ?`; }
+            } 
+            else if (selectedDifficulty === "Medium") {
+                let op = Math.floor(Math.random() * 4);
+                if (op === 0) { let v1 = Math.floor(Math.random()*40)+15; let v2 = Math.floor(Math.random()*40)+15; correctAnswer = v1 + v2; displayFormula = `${v1} + ${v2} = ?`; }
+                else if (op === 1) { let v1 = Math.floor(Math.random()*60)+30; let v2 = Math.floor(Math.random()*25)+5; correctAnswer = v1 - v2; displayFormula = `${v1} - ${v2} = ?`; }
+                else if (op === 2) { let v1 = Math.floor(Math.random()*12)+3; let v2 = Math.floor(Math.random()*9)+2; correctAnswer = v1 * v2; displayFormula = `${v1} × ${v2} = ?`; }
+                else { let v2 = Math.floor(Math.random()*8)+2; correctAnswer = Math.floor(Math.random()*10)+2; displayFormula = `${correctAnswer * v2} ÷ ${v2} = ?`; }
+            }
+            else if (selectedDifficulty === "Hard") {
+                let op = Math.floor(Math.random() * 4);
+                if (op === 0) { let v1 = Math.floor(Math.random()*400)+150; let v2 = Math.floor(Math.random()*300)+50; correctAnswer = v1 + v2; displayFormula = `${v1} + ${v2} = ?`; }
+                else if (op === 1) { let v1 = Math.floor(Math.random()*500)+400; let v2 = Math.floor(Math.random()*250)+20; correctAnswer = v1 - v2; displayFormula = `${v1} - ${v2} = ?`; }
+                else if (op === 2) { let v1 = Math.floor(Math.random()*35)+10; let v2 = Math.floor(Math.random()*25)+5; correctAnswer = v1 * v2; displayFormula = `${v1} × ${v2} = ?`; }
+                else { let v2 = Math.floor(Math.random()*12)+4; correctAnswer = Math.floor(Math.random()*30)+15; displayFormula = `${correctAnswer * v2} ÷ ${v2} = ?`; }
+            }
+            else if (selectedDifficulty === "Impossible") {
+                let op = Math.floor(Math.random() * 3);
+                if (op === 0) { let v1 = Math.floor(Math.random()*4000)+1000; let v2 = Math.floor(Math.random()*3000)+500; correctAnswer = v1 + v2; displayFormula = `${v1} + ${v2} = ?`; }
+                else if (op === 1) { let v1 = Math.floor(Math.random()*60)+10; let v2 = Math.floor(Math.random()*25)+5; correctAnswer = v1 * v2; displayFormula = `${v1} × ${v2} = ?`; }
+                else { let v2 = Math.floor(Math.random()*30)+10; correctAnswer = Math.floor(Math.random()*100)+20; displayFormula = `${correctAnswer * v2} ÷ ${v2} = ?`; }
+            }
+            else if (selectedDifficulty === "Master") {
+                let isAlgebra = Math.random() < 0.4;
+                if (isAlgebra) {
+                    x = Math.floor(Math.random() * 12) + 3; let coeff = Math.floor(Math.random() * 6) + 2; let constant = Math.floor(Math.random() * 25) + 5;
+                    correctAnswer = x; displayFormula = `Solve x:  ${coeff}x + ${constant} = ${coeff * x + constant}`;
+                } else {
+                    let op = Math.floor(Math.random() * 3);
+                    if (op === 0) { let v1 = Math.floor(Math.random()*40000)+10000; let v2 = Math.floor(Math.random()*20000)+2000; correctAnswer = v1 + v2; displayFormula = `${v1} + ${v2} = ?`; }
+                    else if (op === 1) { let v1 = Math.floor(Math.random()*400)+100; let v2 = Math.floor(Math.random()*300)+50; correctAnswer = v1 * v2; displayFormula = `${v1} × ${v2} = ?`; }
+                    else { let v2 = Math.floor(Math.random()*150)+40; correctAnswer = Math.floor(Math.random()*150)+30; displayFormula = `${correctAnswer * v2} ÷ ${v2} = ?`; }
+                }
+            }
+
+            equationText = displayFormula;
+            
+            let laneWidth = canvas.width / 3;
+            let fakeOffset1 = Math.floor(Math.random() * 4) + 1; if(Math.random()<0.5) fakeOffset1 *= -1;
+            let fakeOffset2 = Math.floor(Math.random() * 8) + 5; if(Math.random()<0.5) fakeOffset2 *= -1;
+            
+            let choices = [correctAnswer, correctAnswer + fakeOffset1, correctAnswer + fakeOffset2];
+            choices = [...new Set(choices)];
+            while(choices.length < 3) { choices.push(correctAnswer + Math.floor(Math.random()*40) - 20); }
+            choices.sort(() => Math.random() - 0.5);
+
+            for (let i = 0; i < 3; i++) {
+                mathBlocks.push({
+                    x: i * laneWidth + laneWidth / 2 - 35,
+                    y: -40,
+                    val: choices[i],
+                    speed: mathDropSpeedBase + (Math.random() * 0.2)
+                });
+            }
+        }
+
+        function mathGameEnd(success) {
+            gameActive = false; escMenuBtn.style.display = 'none';
+            let elapsed = ((performance.now() - statStartTime) / 1000).toFixed(1);
+            hideAllBadges();
+            
+            let rank = "BRONZE METRIC";
+            if (success) {
+                if (selectedDifficulty === "Easy") {
+                    rank = mathFails === 0 ? "SILVER [CLEARED]" : "BRONZE [STANDARD]";
+                } else {
+                    let evaluationWeight = parseFloat(elapsed) + (mathFails * 18);
+                    if (selectedDifficulty === "Medium") rank = evaluationWeight < 25 ? "GRANDMASTER [1ST]" : (evaluationWeight < 45 ? "MASTER [2ND]" : "DIAMOND");
+                    else if (selectedDifficulty === "Hard") rank = evaluationWeight < 35 ? "GRANDMASTER [1ST]" : (evaluationWeight < 55 ? "MASTER [2ND]" : "DIAMOND");
+                    else if (selectedDifficulty === "Impossible") rank = evaluationWeight < 38 ? "GRANDMASTER [1ST]" : (evaluationWeight < 60 ? "MASTER [2ND]" : "DIAMOND");
+                    else if (selectedDifficulty === "Master") rank = evaluationWeight < 48 ? "GRANDMASTER [1ST]" : (evaluationWeight < 75 ? "MASTER [2ND]" : (evaluationWeight < 105 ? "DIAMOND [3RD]" : "PLATINUM"));
+                }
+            } else { rank = "TERMINATED [FAILED]"; }
+
+            endScreenHeader.innerText = success ? "🏆 INTELLECT MASTERY ATTAINED! 🏆" : "❌ CALCULATION OVERFLOW: SHUTDOWN ❌";
+            endScreenDesc.innerText = "Mathematical processing loop analysis compiled.";
+            rankLabel.innerText = "Final Intelligence Rank";
+
+            document.getElementById('resDiff').innerText = `MATH (${selectedDifficulty.toUpperCase()})`;
+            document.getElementById('resKills').innerText = `${mathScore} / ${mathTarget}`;
+            document.getElementById('resDeaths').innerText = mathFails;
+            document.getElementById('resDmg').innerText = `${mathScore + mathFails} Targets Scanned`;
+            document.getElementById('resTime').innerText = `${elapsed}s`;
+            document.getElementById('resRank').innerText = rank;
+
+            if (success && selectedDifficulty === "Impossible" && (rank === "GRANDMASTER [1ST]" || rank === "MASTER [2ND]")) {
+                isMasterMathUnlocked = true;
+                loadMasterDirectBtn.style.display = "inline-block"; 
+            }
+
+            let mathematician = false;
+            if (success && selectedDifficulty === "Hard" && rank === "GRANDMASTER [1ST]") mathematician = true;
+            if (success && selectedDifficulty === "Impossible" && (rank === "GRANDMASTER [1ST]" || rank === "MASTER [2ND]")) mathematician = true;
+            if (success && selectedDifficulty === "Master" && (rank === "MASTER [2ND]" || rank === "DIAMOND [3RD]")) mathematician = true;
+
+            let masterMath = (success && selectedDifficulty === "Master" && rank === "GRANDMASTER [1ST]");
+            let perfectScorer = (success && selectedDifficulty === "Impossible" && mathFails === 0);
+            let legend = (success && selectedDifficulty === "Master" && mathFails === 0);
+
+            if (mathematician) document.getElementById('titleMathematician').style.display = "block";
+            if (masterMath) document.getElementById('titleMasterMath').style.display = "block";
+            if (perfectScorer) document.getElementById('titlePerfectScorer').style.display = "block";
+            if (legend) document.getElementById('titleLegend').style.display = "block";
+
+            winScreen.style.display = 'flex';
+        }
+
+
+        // ==========================================
+        // UNIFIED CENTRAL TICK RENDER ENGINE
+        // ==========================================
+        function animate() {
+            if (!gameActive || isDead) return;
+            frameCount++;
+
+            ctx.fillStyle = 'rgba(6, 6, 19, 0.35)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Technical overlay grids background
+            ctx.strokeStyle = 'rgba(0, 240, 255, 0.015)'; ctx.lineWidth = 1;
+            for(let i=0; i<canvas.width; i+=45) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke(); }
+            for(let j=0; j<canvas.height; j+=45) { ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(canvas.width, j); ctx.stroke(); }
+
+            // --------------------------------------
+            // CONTEXT ROUTE 1: HYPERSHOT ENGINE RUNTIME
+            // --------------------------------------
+            if (activeGameMode === "Hypershot") {
+                if (player.iFrames > 0) player.iFrames--;
+
+                if (keys.w && player.y > player.size) player.y -= player.speed;
+                if (keys.s && player.y < canvas.height - player.size) player.y += player.speed;
+                if (keys.a && player.x > player.size) player.x -= player.speed;
+                if (keys.d && player.x < canvas.width - player.size) player.x += player.speed;
+
+                if (player.iFrames === 0 || Math.floor(frameCount / 4) % 2 === 0) {
+                    ctx.fillStyle = player.color; ctx.fillRect(player.x - player.size/2, player.y - player.size/2, player.size, player.size);
+                    ctx.fillStyle = '#ffffff'; ctx.fillRect(player.x - player.size/4, player.y - player.size/4, player.size/2, player.size/2);
+                }
+
+                if (isMouseDown) {
+                    const currentWeapon = weapons[currentWeaponIndex];
+                    if (frameCount - lastShotTime >= currentWeapon.fireRate) {
+                        lastShotTime = frameCount;
+                        const angle = Math.atan2(mouse.y - player.y, mouse.x - player.x);
+                        projectiles.push({ x: player.x, y: player.y, vx: Math.cos(angle)*currentWeapon.speed, vy: Math.sin(angle)*currentWeapon.speed, size: currentWeapon.size, color: currentWeapon.color });
+                    }
+                }
+
+                for (let i = projectiles.length - 1; i >= 0; i--) {
+                    let p = projectiles[i]; p.x += p.vx; p.y += p.vy;
+                    ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
+                    if (p.x < 0 || p.x > canvas.width || p.y < 0 || p.y > canvas.height) projectiles.splice(i, 1);
+                }
+
+                for (let i = enemyProjectiles.length - 1; i >= 0; i--) {
+                    let ep = enemyProjectiles[i]; ep.x += ep.vx; ep.y += ep.vy;
+                    ctx.fillStyle = '#ff3333'; ctx.beginPath(); ctx.arc(ep.x, ep.y, 4, 0, Math.PI * 2); ctx.fill();
+                    if (ep.x > player.x - player.size/2 && ep.x < player.x + player.size/2 && ep.y > player.y - player.size/2 && ep.y < player.y + player.size/2) {
+                        enemyProjectiles.splice(i, 1); takeDamage(ep.dmg); continue;
+                    }
+                    if (ep.x < 0 || ep.x > canvas.width || ep.y < 0 || ep.y > canvas.height) enemyProjectiles.splice(i, 1);
+                }
+
+                if (enemies.length < maxEnemies && frameCount % 40 === 0) {
+                    let pool = [...enemyLexicon]; if (selectedDifficulty === "Easy") pool = pool.filter(e => !e.isBoss);
+                    let template = pool[Math.floor(Math.random() * pool.length)];
+                    let eHp = template.hp; let eText = template.text;
+                    if (activeModifier.type === "bad_5shot" && template.isBoss) { eHp = 5; eText = "🔥 SUPREME EXAM (5-SHOT) 🔥"; }
+                    
+                    let ex, ey; if (Math.random() < 0.5) { ex = Math.random() < 0.5 ? -60 : canvas.width + 60; ey = Math.random() * canvas.height; } 
+                    else { ex = Math.random() * canvas.width; ey = Math.random() < 0.5 ? -30 : canvas.height + 30; }
+
+                    enemies.push({
+                        x: ex, y: ey, speed: (Math.random() * 0.6 + 0.9) * enemySpeedMultiplier, 
+                        text: eText, dmg: template.dmg, hp: eHp, maxHp: eHp,
+                        width: eText.length * 9, height: 18, color: template.color, lastShotTime: frameCount
+                    });
+                }
+
+                for (let i = enemies.length - 1; i >= 0; i--) {
+                    let e = enemies[i]; let dx = player.x - e.x; let dy = player.y - e.y; let dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist > 1) { e.x += (dx / dist) * e.speed; e.y += (dy / dist) * e.speed; }
+
+                    if (frameCount - e.lastShotTime >= (90 / enemyFireRateMultiplier)) {
+                        e.lastShotTime = frameCount;
+                        let angle = Math.atan2(player.y - e.y, player.x - (e.x + e.width/2));
+                        enemyProjectiles.push({ x: e.x + e.width/2, y: e.y - e.height/2, vx: Math.cos(angle)*5, vy: Math.sin(angle)*5, dmg: Math.floor(e.dmg*0.8) });
+                    }
+
+                    ctx.fillStyle = e.color; ctx.font = '900 15px "Orbitron"'; ctx.fillText(e.text, e.x, e.y);
+                    if (e.maxHp > 1) { ctx.fillStyle = '#fff'; ctx.font = '700 11px "Orbitron"'; ctx.fillText(`[HP: ${e.hp}/${e.maxHp}]`, e.x, e.y - 18); }
+
+                    if (player.x + player.size/2 > e.x && player.x - player.size/2 < e.x + e.width && player.y + player.size/2 > e.y - e.height && player.y - player.size/2 < e.y) {
+                        takeDamage(e.dmg);
+                    }
+
+                    for (let j = projectiles.length - 1; j >= 0; j--) {
+                        let p = projectiles[j];
+                        if (p.x > e.x && p.x < e.x + e.width && p.y > e.y - e.height && p.y < e.y) {
+                            projectiles.splice(j, 1); e.hp -= playerDamageMultiplier; statDamageDealt += 25;
+                            if (e.hp <= 0) {
+                                createNeonExplosion(e.x + e.width/2, e.y - e.height/2, e.color);
+                                enemies.splice(i, 1); statKills++;
+                                currentWeaponIndex = Math.min(Math.floor(statKills / 3), weapons.length - 1);
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                ctx.fillStyle = '#fff'; ctx.font = '700 16px "Rajdhani"'; ctx.fillText(`ELIMINATIONS:`, 25, 40);
+                ctx.fillStyle = '#ff007f'; ctx.font = '900 22px "Orbitron"'; ctx.fillText(`${statKills} / ${targetKills}`, 135, 42);
+                ctx.fillStyle = weapons[currentWeaponIndex].color; ctx.font = '900 20px "Orbitron"'; ctx.fillText(weapons[currentWeaponIndex].name.toUpperCase(), canvas.width - 200, 42);
+
+                let barWidth = 200; let barX = canvas.width/2 - barWidth/2;
+                ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.strokeRect(barX, 25, barWidth, 16);
+                ctx.fillStyle = player.hp > (player.maxHp*0.3) ? '#39ff14' : '#ff3333';
+                ctx.fillRect(barX+1, 26, (player.hp / player.maxHp)*barWidth - 2, 14);
+
+                ctx.strokeStyle = weapons[currentWeaponIndex].color; ctx.strokeRect(mouse.x - 6, mouse.y - 6, 12, 12);
+                if (statKills >= targetKills) { hypershotWin(); return; }
+            }
+
+            // --------------------------------------
+            // CONTEXT ROUTE 2: PHANTOM BASKETBALL COURT
+            // --------------------------------------
+            else if (activeGameMode === "Basketball") {
+                if (frameCount % 60 === 0 && bbTimer > 0) bbTimer--;
+
+                hoop.x += hoop.speed * hoop.direction;
+                if (hoop.x < 420 || hoop.x > 840) hoop.direction *= -1;
+
+                ctx.strokeStyle = '#ffaa00'; ctx.lineWidth = 4;
+                ctx.beginPath(); ctx.moveTo(hoop.x, hoop.y); ctx.lineTo(hoop.x + hoop.width, hoop.y); ctx.stroke();
+                ctx.strokeStyle = 'rgba(255, 170, 0, 0.25)'; ctx.lineWidth = 2;
+                ctx.strokeRect(hoop.x, hoop.y, hoop.width, hoop.height + 25);
+
+                if (ball.isFlying) {
+                    ball.vy += 0.22; ball.x += ball.vx; ball.y += ball.vy;
+                    if (ball.vy > 0 && ball.x > hoop.x && ball.x < hoop.x + hoop.width && ball.y >= hoop.y - 12 && ball.y <= hoop.y + 12) {
+                        bbScore++; createNeonExplosion(hoop.x + hoop.width/2, hoop.y, '#ffaa00'); resetBasketballPosition();
+                    }
+                    else if (ball.y > canvas.height + 20 || ball.x < -20 || ball.x > canvas.width + 20) { resetBasketballPosition(); }
+                }
+
+                if (bbAiming) {
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; ctx.lineWidth = 2; ctx.setLineDash([4, 6]);
+                    let tX = ball.x; let tY = ball.y;
+                    let tVx = (mouse.x - ball.x) * 0.12; let tVy = (mouse.y - ball.y) * 0.12;
+                    ctx.beginPath(); ctx.moveTo(tX, tY);
+                    for (let i = 0; i < 30; i++) { tVy += 0.22; tX += tVx; tY += tVy; ctx.lineTo(tX, tY); }
+                    ctx.stroke(); ctx.setLineDash([]);
+                }
+
+                ctx.fillStyle = '#ff5500'; ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2); ctx.fill();
+                ctx.strokeStyle = '#ffffff'; ctx.stroke();
+
+                ctx.fillStyle = '#fff'; ctx.font = '700 16px "Rajdhani"'; ctx.fillText("GOALS SCORED:", 25, 40);
+                ctx.fillStyle = '#ffaa00'; ctx.font = '900 24px "Orbitron"'; ctx.fillText(`${bbScore} / 10`, 140, 42);
+                ctx.fillStyle = '#fff'; ctx.font = '700 16px "Rajdhani"'; ctx.fillText("TOTAL ATTEMPTS:", 260, 40);
+                ctx.fillStyle = '#00f0ff'; ctx.font = '900 24px "Orbitron"'; ctx.fillText(`${bbAttempts}`, 380, 42);
+                ctx.fillStyle = '#fff'; ctx.font = '700 16px "Rajdhani"'; ctx.fillText("TIME REMAINING:", canvas.width - 230, 40);
+                ctx.fillStyle = '#ff3333'; ctx.font = '900 24px "Orbitron"'; ctx.fillText(`${bbTimer}s`, canvas.width - 70, 42);
+
+                ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '500 14px "Rajdhani"';
+                ctx.fillText("🎮 COURT OPERATIONAL GUIDE: CLICK AND DRAG IN THE SAME DIRECTION YOU WANT TO AIM | RELEASE TO SHOOT", 25, canvas.height - 25);
+
+                if (bbScore >= 10) { basketballEnd(true); return; }
+                if (bbTimer <= 0) { basketballEnd(false); return; }
+            }
+
+            // --------------------------------------
+            // CONTEXT ROUTE 3: ALGEBRA OVERDRIVE MACHINE
+            // --------------------------------------
+            else if (activeGameMode === "Math") {
+                if (keys.a && mathPlayerX > mathPlayerSize) mathPlayerX -= 7.5;
+                if (keys.d && mathPlayerX < canvas.width - mathPlayerSize) mathPlayerX += 7.5;
+
+                ctx.fillStyle = '#39ff14'; ctx.fillRect(mathPlayerX - mathPlayerSize, canvas.height - 50, mathPlayerSize * 2, 20);
+                ctx.fillStyle = '#ffffff'; ctx.fillRect(mathPlayerX - mathPlayerSize/2, canvas.height - 45, mathPlayerSize, 10);
+
+                for (let i = mathBlocks.length - 1; i >= 0; i--) {
+                    let b = mathBlocks[i]; b.y += b.speed;
+                    
+                    ctx.fillStyle = '#060613'; ctx.fillRect(b.x, b.y, 70, 40);
+                    ctx.strokeStyle = '#00f0ff'; ctx.lineWidth = 2; ctx.strokeRect(b.x, b.y, 70, 40);
+                    
+                    ctx.fillStyle = '#ffffff'; ctx.font = '900 15px "Orbitron"';
+                    ctx.textAlign = "center"; ctx.fillText(b.val, b.x + 35, b.y + 26); ctx.textAlign = "left";
+
+                    if (b.y + 40 >= canvas.height - 50 && b.y <= canvas.height - 30 && b.x + 70 >= mathPlayerX - mathPlayerSize && b.x <= mathPlayerX + mathPlayerSize) {
+                        if (b.val === correctAnswer) {
+                            mathScore++; createNeonExplosion(b.x+35, b.y+20, '#39ff14');
+                            generateDynamicMathProblem();
+                        } else {
+                            mathFails++; createNeonExplosion(b.x+35, b.y+20, '#ff3333');
+                            damagePops.push({ x: mathPlayerX, y: canvas.height - 80, text: "WRONG VALUE DETECTED", color: "#ff0055" });
+                            generateDynamicMathProblem();
+                        }
+                        break;
+                    }
+                    
+                    if (b.y > canvas.height) {
+                        mathFails++;
+                        damagePops.push({ x: mathPlayerX, y: canvas.height - 80, text: "TARGET DROPPED", color: "#ffaa00" });
+                        generateDynamicMathProblem();
+                        break;
+                    }
+                }
+
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.04)'; ctx.fillRect(20, canvas.height - 125, canvas.width - 40, 55);
+                ctx.strokeStyle = 'rgba(57, 255, 20, 0.2)'; ctx.strokeRect(20, canvas.height - 125, canvas.width - 40, 55);
+                
+                ctx.fillStyle = '#a5a5cc'; ctx.font = '700 16px "Rajdhani"'; ctx.fillText("COMPUTE VALUE TO PREVENT SHUTDOWN:", 45, canvas.height - 92);
+                ctx.fillStyle = '#ffff00'; ctx.font = '900 24px "Orbitron"'; ctx.fillText(equationText, canvas.width - 420, canvas.height - 90);
+
+                ctx.fillStyle = '#fff'; ctx.font = '700 16px "Rajdhani"'; ctx.fillText("SOLVED RUNS:", 25, 40);
+                ctx.fillStyle = '#39ff14'; ctx.font = '900 24px "Orbitron"'; ctx.fillText(`${mathScore} / ${mathTarget}`, 135, 42);
+                ctx.fillStyle = '#fff'; ctx.font = '700 16px "Rajdhani"'; ctx.fillText("CRITICAL FAILS:", 250, 40);
+                ctx.fillStyle = '#ff3333'; ctx.font = '900 24px "Orbitron"'; ctx.fillText(`${mathFails} / ${mathMaxAllowedErrors}`, 370, 42);
+                ctx.fillStyle = '#fff'; ctx.font = '700 16px "Rajdhani"'; ctx.fillText("VELOCITY SCALE:", 470, 40);
+                ctx.fillStyle = '#00f0ff'; ctx.font = '900 24px "Orbitron"'; ctx.fillText(`${mathDropSpeedBase} m/s`, 590, 42);
+
+                ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.font = '500 14px "Rajdhani"';
+                ctx.fillText("🎮 INSTRUCTIONS: USE 'A' KEY TO SLIDE LEFT | 'D' KEY TO SLIDE RIGHT | INTERCEPT THE CORRECT FLOATING NUMBER BLOCK", 25, canvas.height - 25);
+
+                if (mathScore >= mathTarget) { mathGameEnd(true); return; }
+                if (mathFails >= mathMaxAllowedErrors) { mathGameEnd(false); return; }
+            }
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let pt = particles[i]; pt.x += pt.vx; pt.y += pt.vy; pt.alpha -= 0.04;
+                if (pt.alpha <= 0) particles.splice(i, 1);
+                else { ctx.fillStyle = pt.color; ctx.globalAlpha = pt.alpha; ctx.fillRect(pt.x, pt.y, pt.radius, pt.radius); ctx.globalAlpha = 1.0; }
+            }
+            for (let i = damagePops.length - 1; i >= 0; i--) {
+                let d = damagePops[i]; d.y -= 1; d.alpha = d.alpha ? d.alpha - 0.03 : 0.97;
+                if (d.alpha <= 0) damagePops.splice(i, 1);
+                else { ctx.fillStyle = d.color; ctx.font = 'bold 14px "Orbitron"'; ctx.globalAlpha = d.alpha; ctx.fillText(d.text, d.x, d.y); ctx.globalAlpha = 1.0; }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        function takeDamage(amount) {
+            if (player.iFrames > 0 || isDead) return;
+            player.hp -= amount; player.iFrames = 30;
+            damagePops.push({ x: player.x - 15, y: player.y - 25, text: `-${amount} HP`, color: '#ff3333' });
+            if (player.hp <= 0) { player.hp = 0; statDeaths++; handlePlayerDeath(); }
+        }
+
+        function handlePlayerDeath() {
+            isDead = true; isMouseDown = false; reviveScreen.style.display = 'flex';
+            let cd = 5; timerDisplay.innerText = cd;
+            let timerTick = setInterval(() => {
+                cd--; timerDisplay.innerText = cd;
+                if(cd <= 0) { clearInterval(timerTick); reviveScreen.style.display = 'none'; isDead = false; player.hp = player.maxHp; player.iFrames = 60; projectiles = []; enemyProjectiles = []; enemies = []; player.x = canvas.width/2; player.y = canvas.height/2; animate(); }
+            }, 1000);
+        }
+
+        function createNeonExplosion(x, y, color) {
+            for (let i = 0; i < 15; i++) {
+                particles.push({ x: x, y: y, vx: (Math.random() - 0.5) * 6, vy: (Math.random() - 0.5) * 6, radius: Math.random()*2+1, alpha: 1, color: color });
+            }
+        }
+    </script>
+</body>
+</html>
